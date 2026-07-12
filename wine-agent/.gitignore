@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Env & secrets — never commit these
+.env
+.env.*
+*.pem
+*.key
+secrets/
+
+# Data artifacts — seed JSON under data/ is tracked; generated/downloaded are not
+data/snapshot/
+data/external/
+raw_html/
+snapshots/
+*.sqlite
+*.sqlite3
+*.db
+chroma/
+qdrant_storage/
+phoenix_data/
+ollama_models/
+
+# Frontend
+node_modules/
+dist/
+.vite/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

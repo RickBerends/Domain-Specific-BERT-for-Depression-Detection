@@ -1,0 +1,58 @@
+[
+  {
+    "url": "https://fixtureshop.example/bezorging",
+    "title": "Delivery and shipping",
+    "section": "policy",
+    "language": "en",
+    "body_text": "We ship to the Netherlands, Belgium, Germany and France. Delivery is free for orders over 75 euro; below that a 6,95 euro shipping fee applies. Orders placed before 16:00 on a working day are usually dispatched the same day and arrive within 1 to 3 working days. All prices include VAT (BTW)."
+  },
+  {
+    "url": "https://fixtureshop.example/openingstijden",
+    "title": "Opening hours and contact",
+    "section": "shop_info",
+    "language": "en",
+    "body_text": "Our shop in Tilburg is open Tuesday to Friday from 10:00 to 18:00 and Saturday from 10:00 to 17:00. We are closed on Sundays and Mondays. You can reach us by phone at 013-1234567 or by email at info@fixtureshop.example."
+  },
+  {
+    "url": "https://fixtureshop.example/herroepingsrecht",
+    "title": "Returns and right of withdrawal",
+    "section": "policy",
+    "language": "en",
+    "body_text": "You may return unopened bottles within 14 days of receipt for a full refund. Please contact us first so we can arrange the return. Opened bottles cannot be returned for hygiene and legal reasons unless the wine is faulty."
+  },
+  {
+    "url": "https://fixtureshop.example/wijnspijswijzer",
+    "title": "Food and wine pairing guide",
+    "section": "guide",
+    "language": "en",
+    "body_text": "A few simple rules of thumb. Fresh white wines like Sauvignon Blanc and Vinho Verde suit fish, shellfish and salads. Full reds like Bordeaux, Malbec and Shiraz stand up to red meat, stew and barbecue. Off-dry Riesling is excellent with spicy Asian dishes. Rose and Cava make great aperitifs. Tawny port pairs beautifully with blue cheese and nutty desserts."
+  },
+  {
+    "url": "https://fixtureshop.example/begrippenlijst",
+    "title": "Wine glossary",
+    "section": "guide",
+    "language": "en",
+    "body_text": "Tannin: a natural compound in red wine that gives a drying, grippy sensation. Crianza: a Spanish ageing category, typically two years with time in oak. Brut: a dry style of sparkling wine. Kabinett: the lightest ripeness level in German wine classification. Terroir: the combination of soil, climate and place that shapes a wine's character."
+  },
+  {
+    "url": "https://fixtureshop.example/openingstijden",
+    "title": "Openingstijden en contact",
+    "section": "shop_info",
+    "language": "nl",
+    "body_text": "Onze winkel in Tilburg is geopend van dinsdag tot en met vrijdag van 10:00 tot 18:00 uur en op zaterdag van 10:00 tot 17:00 uur. Op zondag en maandag zijn wij gesloten. U kunt ons bereiken via telefoonnummer 013-1234567 of per e-mail via info@fixtureshop.example."
+  },
+  {
+    "url": "https://fixtureshop.example/bezorging",
+    "title": "Bezorging en verzendkosten",
+    "section": "policy",
+    "language": "nl",
+    "body_text": "Wij bezorgen in Nederland, België, Duitsland en Frankrijk. Bezorging is gratis bij bestellingen vanaf 75 euro; daaronder rekenen wij 6,95 euro verzendkosten. Bestellingen die op werkdagen vóór 16:00 uur binnenkomen, worden meestal dezelfde dag verzonden en zijn binnen 1 tot 3 werkdagen bij u. Alle prijzen zijn inclusief BTW."
+  },
+  {
+    "url": "https://fixtureshop.example/nix18",
+    "title": "NIX18 age check",
+    "section": "compliance",
+    "language": "nl",
+    "body_text": "Wij verkopen geen alcohol aan personen onder de 18 jaar. Bij bezorging en in de winkel vragen wij om een geldig legitimatiebewijs wanneer daar aanleiding toe is. Onder de 18 jaar kun je bij ons geen alcoholhoudende producten bestellen (NIX18)."
+  }
+]
