@@ -106,6 +106,7 @@ def _write_products(
             {
                 "slug": product.slug,
                 "color_type": product.color_type.value if product.color_type else None,
+                "country": product.country,
                 "price_cents": product.price_cents,
                 "language": product.language.value,
             },

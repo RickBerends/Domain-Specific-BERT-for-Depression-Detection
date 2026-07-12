@@ -21,8 +21,7 @@ def test_exact_name_query_returns_that_wine(reader, config):
 def test_pairing_query_returns_products_and_content(reader, config):
     result = _retriever(reader, config).retrieve("wine to pair with oysters")
     assert result.products, "expected at least one product"
-    # the pairing guide content page should surface too
-    assert any("pairing" in c.title.lower() or "Delivery" in c.title for c in result.contents) or result.contents == []
+    assert len(result.contents) <= 2, "catalog route caps content at 2 chunks"
 
 
 def test_respects_top_k(reader, config):

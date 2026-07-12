@@ -24,6 +24,8 @@ class Config:
 
     top_k: int = int(os.getenv("WINE_TOP_K", "6"))
     max_message_chars: int = int(os.getenv("WINE_MAX_MSG_CHARS", "2000"))
+    history_turns: int = int(os.getenv("WINE_HISTORY_TURNS", "4"))
+    session_ttl_seconds: float = float(os.getenv("WINE_SESSION_TTL", "1800"))
 
     # Path to the published snapshot (SQLite catalog + serialized vector index).
     snapshot_dir: str = os.getenv(

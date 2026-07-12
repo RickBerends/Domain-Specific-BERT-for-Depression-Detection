@@ -35,6 +35,20 @@
     "body_text": "Tannin: a natural compound in red wine that gives a drying, grippy sensation. Crianza: a Spanish ageing category, typically two years with time in oak. Brut: a dry style of sparkling wine. Kabinett: the lightest ripeness level in German wine classification. Terroir: the combination of soil, climate and place that shapes a wine's character."
   },
   {
+    "url": "https://fixtureshop.example/openingstijden",
+    "title": "Openingstijden en contact",
+    "section": "shop_info",
+    "language": "nl",
+    "body_text": "Onze winkel in Tilburg is geopend van dinsdag tot en met vrijdag van 10:00 tot 18:00 uur en op zaterdag van 10:00 tot 17:00 uur. Op zondag en maandag zijn wij gesloten. U kunt ons bereiken via telefoonnummer 013-1234567 of per e-mail via info@fixtureshop.example."
+  },
+  {
+    "url": "https://fixtureshop.example/bezorging",
+    "title": "Bezorging en verzendkosten",
+    "section": "policy",
+    "language": "nl",
+    "body_text": "Wij bezorgen in Nederland, België, Duitsland en Frankrijk. Bezorging is gratis bij bestellingen vanaf 75 euro; daaronder rekenen wij 6,95 euro verzendkosten. Bestellingen die op werkdagen vóór 16:00 uur binnenkomen, worden meestal dezelfde dag verzonden en zijn binnen 1 tot 3 werkdagen bij u. Alle prijzen zijn inclusief BTW."
+  },
+  {
     "url": "https://fixtureshop.example/nix18",
     "title": "NIX18 age check",
     "section": "compliance",

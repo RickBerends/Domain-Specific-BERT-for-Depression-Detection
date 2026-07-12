@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wine Agent — demo</title>
+<style>
+  :root {
+    --bg: #faf7f4; --panel: #ffffff; --ink: #2b2320; --muted: #8a7f78;
+    --accent: #7a1f2b; --accent-soft: #f3e2e4; --border: #e7ddd6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--bg); color: var(--ink);
+    display: flex; flex-direction: column; height: 100dvh;
+  }
+  header {
+    padding: 14px 20px; background: var(--panel); border-bottom: 1px solid var(--border);
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  header h1 { font-size: 16px; margin: 0; color: var(--accent); }
+  header .sub { font-size: 12px; color: var(--muted); }
+  #log { flex: 1; overflow-y: auto; padding: 20px; max-width: 760px; width: 100%; margin: 0 auto; }
+  .msg { margin: 10px 0; display: flex; }
+  .msg.user { justify-content: flex-end; }
+  .bubble {
+    max-width: 82%; padding: 10px 14px; border-radius: 14px; white-space: pre-wrap;
+    background: var(--panel); border: 1px solid var(--border);
+  }
+  .user .bubble { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .cards { display: flex; gap: 10px; overflow-x: auto; padding: 4px 0 8px; }
+  .card {
+    min-width: 170px; max-width: 190px; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px; font-size: 13px; text-decoration: none; color: var(--ink);
+  }
+  .card b { display: block; margin-bottom: 4px; color: var(--accent); font-size: 13px; }
+  .card .price { font-weight: 600; }
+  .err { color: #a33; font-size: 13px; }
+  footer { background: var(--panel); border-top: 1px solid var(--border); padding: 12px 20px 16px; }
+  .inner { max-width: 760px; margin: 0 auto; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .chip {
+    border: 1px solid var(--border); background: var(--accent-soft); color: var(--accent);
+    border-radius: 999px; padding: 5px 12px; font-size: 13px; cursor: pointer;
+  }
+  form { display: flex; gap: 8px; }
+  input[type=text] {
+    flex: 1; font-size: 16px; padding: 10px 14px; border: 1px solid var(--border);
+    border-radius: 10px; outline: none; background: var(--bg);
+  }
+  button[type=submit] {
+    background: var(--accent); color: #fff; border: 0; border-radius: 10px;
+    padding: 0 18px; font-size: 15px; cursor: pointer;
+  }
+  button[disabled] { opacity: .5; cursor: default; }
+  .notice { font-size: 11px; color: var(--muted); margin-top: 8px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🍷 Wine Agent</h1>
+  <span class="sub" id="snap">demo — loading catalogue…</span>
+</header>
+
+<div id="log"></div>
+
+<footer>
+  <div class="inner">
+    <div class="chips" id="chips">
+      <button class="chip">Red wine under €15</button>
+      <button class="chip">Which wine pairs with oysters?</button>
+      <button class="chip">Wijn bij vis tot 10 euro</button>
+      <button class="chip">What are your opening hours?</button>
+    </div>
+    <form id="form">
+      <input id="input" type="text" placeholder="Ask about our wines… / Stel je vraag…" autocomplete="off">
+      <button type="submit" id="send">Send</button>
+    </form>
+    <div class="notice">AI assistant — answers can contain mistakes; prices from the shop catalogue. Alcohol: 18+ (NIX18).</div>
+  </div>
+</footer>
+
+<script>
+const log = document.getElementById('log');
+const form = document.getElementById('form');
+const input = document.getElementById('input');
+const send = document.getElementById('send');
+
+let sessionId = sessionStorage.getItem('wine-session') || null;
+
+fetch('/snapshot').then(r => r.json()).then(s => {
+  document.getElementById('snap').textContent =
+    `demo — ${s.product_count} wines, snapshot “${s.snapshot_id}”`;
+}).catch(() => {});
+
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text) n.textContent = text;
+  return n;
+}
+
+function addUser(text) {
+  const m = el('div', 'msg user');
+  m.appendChild(el('div', 'bubble', text));
+  log.appendChild(m); log.scrollTop = log.scrollHeight;
+}
+
+function addCards(cards) {
+  const row = el('div', 'cards');
+  for (const c of cards) {
+    const a = el('a', 'card');
+    if (c.url) { a.href = c.url; a.target = '_blank'; a.rel = 'noopener'; }
+    a.appendChild(el('b', null, c.name));
+    if (c.price_eur != null)
+      a.appendChild(el('span', 'price', '€' + c.price_eur.toFixed(2)));
+    row.appendChild(a);
+  }
+  log.appendChild(row); log.scrollTop = log.scrollHeight;
+}
+
+function addAssistantBubble() {
+  const m = el('div', 'msg');
+  const b = el('div', 'bubble', '');
+  m.appendChild(b);
+  log.appendChild(m);
+  return b;
+}
+
+async function ask(text) {
+  addUser(text);
+  send.disabled = true;
+  const bubble = addAssistantBubble();
+  bubble.textContent = '…';
+  let first = true;
+  try {
+    const resp = await fetch('/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, session_id: sessionId }),
+    });
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const parts = buf.split('\n\n');
+      buf = parts.pop();
+      for (const part of parts) {
+        if (!part.startsWith('data: ')) continue;
+        const ev = JSON.parse(part.slice(6));
+        if (ev.type === 'session') {
+          sessionId = ev.session_id;
+          sessionStorage.setItem('wine-session', sessionId);
+        } else if (ev.type === 'cards') {
+          bubble.parentElement.before(document.createElement('div'));
+          addCardsBefore(bubble.parentElement, ev.cards);
+        } else if (ev.type === 'token') {
+          if (first) { bubble.textContent = ''; first = false; }
+          bubble.textContent += ev.text;
+          log.scrollTop = log.scrollHeight;
+        } else if (ev.type === 'error') {
+          bubble.classList.add('err');
+          bubble.textContent = ev.message;
+          first = false;
+        }
+      }
+    }
+    if (first) bubble.textContent = '(no answer)';
+  } catch (e) {
+    bubble.classList.add('err');
+    bubble.textContent = 'Connection error — is the server running?';
+  } finally {
+    send.disabled = false; input.focus();
+  }
+}
+
+function addCardsBefore(node, cards) {
+  const row = el('div', 'cards');
+  for (const c of cards) {
+    const a = el('a', 'card');
+    if (c.url) { a.href = c.url; a.target = '_blank'; a.rel = 'noopener'; }
+    a.appendChild(el('b', null, c.name));
+    if (c.price_eur != null)
+      a.appendChild(el('span', 'price', '€' + c.price_eur.toFixed(2)));
+    row.appendChild(a);
+  }
+  node.parentNode.insertBefore(row, node);
+  log.scrollTop = log.scrollHeight;
+}
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const text = input.value.trim();
+  if (!text || send.disabled) return;
+  input.value = '';
+  ask(text);
+});
+
+document.getElementById('chips').addEventListener('click', (e) => {
+  if (e.target.classList.contains('chip') && !send.disabled) ask(e.target.textContent);
+});
+</script>
+</body>
+</html>

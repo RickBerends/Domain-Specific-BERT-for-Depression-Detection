@@ -13,12 +13,13 @@ with deterministic fakes or against a local Ollama with no code change.
 from __future__ import annotations
 
 import json
+import os
 import uuid
 from functools import lru_cache
 from typing import Iterator
 
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 from chat.config import load_config
@@ -44,6 +45,14 @@ def _sse(event: dict) -> str:
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
+
+
+@app.get("/demo")
+def demo() -> FileResponse:
+    return FileResponse(
+        os.path.join(os.path.dirname(__file__), "static", "demo.html"),
+        media_type="text/html",
+    )
 
 
 @app.get("/snapshot")

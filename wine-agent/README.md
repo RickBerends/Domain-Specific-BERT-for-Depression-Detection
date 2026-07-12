@@ -27,10 +27,11 @@ See [`context/`](./context):
 
 ## Status
 
-First code landed: a runnable, end-to-end slice of the chat subsystem
-(`schemas/` + `ingest/seed.py` + `chat/`), offline by default with deterministic
-fakes and Ollama-ready via env vars. See [`CHAT.md`](./CHAT.md) to run it.
-Remaining work follows the milestones section of the technical plan.
+Runnable end-to-end: X-Wines catalogue ingest, hybrid retrieval with EN/NL
+metadata filters ("red under €15" / "rode wijn tot 15 euro"), session memory
+with follow-ups, and a browser demo at `/demo` — offline by default with
+deterministic fakes, Ollama-ready via env vars. See [`CHAT.md`](./CHAT.md) to
+run it. Remaining work follows the milestones in the technical plan.
 
 ## Note on permission
 

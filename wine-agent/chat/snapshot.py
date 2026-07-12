@@ -8,14 +8,17 @@ triggers ingest.
 
 from __future__ import annotations
 
-import json
 import os
 import sqlite3
+from typing import TYPE_CHECKING
 
 from schemas import Content, Product, SnapshotRef
 from schemas.snapshot_format import CATALOG_DB, SNAPSHOT_JSON, VECTORS_JSON
 
 from chat.vectorstore import InMemoryVectorIndex, VectorHit
+
+if TYPE_CHECKING:
+    from chat.planner import Filters
 
 
 class SnapshotReader:
@@ -52,25 +55,46 @@ class SnapshotReader:
     def vector_search(self, embedding: list[float], top_k: int) -> list[VectorHit]:
         return self._vectors.query(embedding, top_k)
 
-    def lexical_search(self, query: str, top_k: int) -> list[tuple[str, float]]:
+    def lexical_search(
+        self, query: str, top_k: int, filters: "Filters | None" = None
+    ) -> list[tuple[str, float]]:
         """FTS5 lexical search over products. Returns (slug, score) high→low.
 
         bm25() returns lower-is-better; negate so callers merge on high-is-good.
+        With ``filters``, candidates are constrained by joining the products
+        table on the structured columns ("red under €15" → WHERE, §4.5).
         """
         match = _to_fts_query(query)
         if not match:
             return []
+        where, params = _filter_sql(filters, alias="p")
         rows = self._db.execute(
-            """
-            SELECT slug, bm25(products_fts) AS rank
-            FROM products_fts
-            WHERE products_fts MATCH ?
+            f"""
+            SELECT f.slug AS slug, bm25(products_fts) AS rank
+            FROM products_fts f
+            JOIN products p ON p.slug = f.slug
+            WHERE products_fts MATCH ?{where}
             ORDER BY rank
             LIMIT ?
             """,
-            (match, top_k),
+            (match, *params, top_k),
         ).fetchall()
         return [(r["slug"], -float(r["rank"])) for r in rows]
+
+    def filter_products(self, filters: "Filters", top_k: int) -> list[str]:
+        """Pure metadata query for turns with filters but no useful text terms
+        ("something under €10"). Cheapest-first is the useful order there."""
+        where, params = _filter_sql(filters, alias="products")
+        rows = self._db.execute(
+            f"""
+            SELECT slug FROM products
+            WHERE 1=1{where}
+            ORDER BY price_cents ASC
+            LIMIT ?
+            """,
+            (*params, top_k),
+        ).fetchall()
+        return [r["slug"] for r in rows]
 
     def content_search(self, query: str, top_k: int) -> list[Content]:
         match = _to_fts_query(query)
@@ -90,15 +114,48 @@ class SnapshotReader:
         return [Content.model_validate_json(r["json"]) for r in rows]
 
 
+def _filter_sql(filters: "Filters | None", alias: str) -> tuple[str, list]:
+    """Render planner filters as an AND-clause suffix + params."""
+    if filters is None:
+        return "", []
+    clauses: list[str] = []
+    params: list = []
+    if filters.color_type is not None:
+        clauses.append(f"{alias}.color_type = ?")
+        params.append(filters.color_type.value)
+    if filters.country is not None:
+        clauses.append(f"{alias}.country = ?")
+        params.append(filters.country)
+    if filters.max_price_cents is not None:
+        clauses.append(f"{alias}.price_cents <= ?")
+        params.append(filters.max_price_cents)
+    if filters.min_price_cents is not None:
+        clauses.append(f"{alias}.price_cents >= ?")
+        params.append(filters.min_price_cents)
+    if not clauses:
+        return "", []
+    return " AND " + " AND ".join(clauses), params
+
+
+# High-frequency EN/NL words that would make the OR-query match everything.
+_STOPWORDS = frozenset(
+    """a an and are at bij can de do doe een en for from have heb hebben heeft
+    het hoe iets ik in is it je jullie kan kunnen me met mij mijn naar of on
+    onze ook op or the to under u uw van voor waar wat we welke what which wil
+    wij with would you zijn zoek""".split()
+)
+
+
 def _to_fts_query(query: str) -> str:
     """Turn free text into a safe FTS5 OR-query of the alphanumeric tokens.
 
     Avoids FTS5 syntax errors from user punctuation and widens recall (any term
     may match); relevance ordering is left to bm25 and the vector side.
+    Stopwords are dropped so filler words don't drag in unrelated pages.
     """
     tokens = [
         "".join(ch for ch in tok if ch.isalnum())
         for tok in query.lower().split()
     ]
-    tokens = [t for t in tokens if len(t) > 1]
+    tokens = [t for t in tokens if len(t) > 1 and t not in _STOPWORDS]
     return " OR ".join(tokens)

@@ -32,6 +32,13 @@ def test_health(client):
     assert client.get("/health").json() == {"status": "ok"}
 
 
+def test_demo_page_served(client):
+    resp = client.get("/demo")
+    assert resp.status_code == 200
+    assert resp.headers["content-type"].startswith("text/html")
+    assert "Wine Agent" in resp.text
+
+
 def test_snapshot_endpoint(client):
     data = client.get("/snapshot").json()
     assert data["snapshot_id"] == "test"

@@ -11,7 +11,7 @@ def test_ref_reports_published_counts(reader: SnapshotReader):
     ref = reader.ref()
     assert ref.published is True
     assert ref.product_count == 20
-    assert ref.content_count == 6
+    assert ref.content_count == 8
 
 
 def test_get_product_roundtrips_full_model(reader: SnapshotReader):
