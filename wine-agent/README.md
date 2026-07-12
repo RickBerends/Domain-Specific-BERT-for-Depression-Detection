@@ -23,6 +23,7 @@ See [`context/`](./context):
 
 - [`01-technical-plan.md`](./context/01-technical-plan.md) — architecture, scraping pipeline, chat service, frontend, security, milestones
 - [`02-vanbilsen-site-addendum.md`](./context/02-vanbilsen-site-addendum.md) — findings from the live site and how they change the plan
+- [`03-data-acquisition-plan.md`](./context/03-data-acquisition-plan.md) — datasets, open knowledge sources, and safe scrape targets for building without the client site
 
 ## Status
 
