@@ -57,3 +57,39 @@ def test_wants_cheaper():
 def test_sparkling_synonyms():
     assert plan("a bottle of prosecco or cava").filters.color_type is ColorType.sparkling
     assert plan("mousserende wijn voor oud en nieuw").filters.color_type is ColorType.sparkling
+
+
+def test_negation_does_not_lock_onto_first_color_word():
+    p = plan("not red, I'd like a white wine please")
+    assert p.filters.color_type is ColorType.white
+
+
+def test_negation_nl():
+    p = plan("geen rode wijn, liever een witte")
+    assert p.filters.color_type is ColorType.white
+
+
+def test_positive_mention_after_color_still_works():
+    # sanity: negation handling must not break the existing "first match wins"
+    # behaviour when there's no negation at all.
+    p = plan("I want white, not red")
+    assert p.filters.color_type is ColorType.white
+
+
+def test_white_varietal_without_the_word_white():
+    assert plan("do you have a chardonnay?").filters.color_type is ColorType.white
+    assert plan("I'd like a nice riesling").filters.color_type is ColorType.white
+
+
+def test_red_varietal_without_the_word_red():
+    assert plan("a bottle of malbec please").filters.color_type is ColorType.red
+
+
+def test_two_word_varietal_phrases():
+    assert plan("something with sauvignon blanc notes").filters.color_type is ColorType.white
+    assert plan("a pinot noir for dinner").filters.color_type is ColorType.red
+
+
+def test_ambiguous_bare_varietal_is_not_guessed():
+    # bare "pinot" spans multiple colours (noir/grigio/blanc) — must not guess.
+    assert plan("something pinot, surprise me").filters.color_type is None

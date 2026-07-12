@@ -7,73 +7,154 @@
 <style>
   :root {
     --bg: #faf7f4; --panel: #ffffff; --ink: #2b2320; --muted: #8a7f78;
-    --accent: #7a1f2b; --accent-soft: #f3e2e4; --border: #e7ddd6;
+    --accent: #7a1f2b; --accent-dark: #5c1620; --accent-soft: #f3e2e4;
+    --border: #e7ddd6; --err: #a33; --err-soft: #fbe9e9;
+    --shadow-sm: 0 1px 2px rgba(43,35,32,.06), 0 1px 1px rgba(43,35,32,.04);
+    --shadow-md: 0 6px 16px rgba(43,35,32,.10), 0 2px 6px rgba(43,35,32,.06);
+    --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px;
+    --fs-xs: 11px; --fs-sm: 12px; --fs-base: 15px; --fs-md: 16px; --fs-lg: 20px;
+    --radius-sm: 10px; --radius-md: 14px; --radius-pill: 999px;
   }
   * { box-sizing: border-box; }
   body {
-    margin: 0; font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+    margin: 0; font: var(--fs-base)/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
     background: var(--bg); color: var(--ink);
     display: flex; flex-direction: column; height: 100dvh;
   }
-  header {
-    padding: 14px 20px; background: var(--panel); border-bottom: 1px solid var(--border);
-    display: flex; align-items: baseline; gap: 12px;
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
   }
-  header h1 { font-size: 16px; margin: 0; color: var(--accent); }
-  header .sub { font-size: 12px; color: var(--muted); }
-  #log { flex: 1; overflow-y: auto; padding: 20px; max-width: 760px; width: 100%; margin: 0 auto; }
-  .msg { margin: 10px 0; display: flex; }
+  header {
+    padding: var(--space-4) var(--space-5); background: var(--panel); border-bottom: 1px solid var(--border);
+    display: flex; align-items: baseline; gap: var(--space-3); box-shadow: var(--shadow-sm);
+  }
+  header h1 { font-size: var(--fs-md); margin: 0; color: var(--accent); }
+  header .sub { font-size: var(--fs-sm); color: var(--muted); }
+  .fake-backend-banner {
+    display: none; background: #fbf0d9; color: #7a5a1c; border-bottom: 1px solid #e8c97a;
+    font-size: var(--fs-sm); padding: var(--space-2) var(--space-5); text-align: center;
+  }
+  .fake-backend-banner.visible { display: block; }
+  .fake-backend-banner code { background: rgba(0,0,0,.06); padding: 1px 5px; border-radius: 4px; }
+  #log {
+    flex: 1; overflow-y: auto; padding: var(--space-5); max-width: 760px; width: 100%; margin: 0 auto;
+  }
+  .msg { margin: var(--space-3) 0; display: flex; }
   .msg.user { justify-content: flex-end; }
   .bubble {
-    max-width: 82%; padding: 10px 14px; border-radius: 14px; white-space: pre-wrap;
-    background: var(--panel); border: 1px solid var(--border);
+    max-width: 82%; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md);
+    background: var(--panel); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
   }
+  .bubble div { margin: 0 0 var(--space-1); }
+  .bubble div:last-child { margin-bottom: 0; }
+  .bubble .md-list { margin: var(--space-1) 0; padding-left: 1.2em; }
   .user .bubble { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .cards { display: flex; gap: 10px; overflow-x: auto; padding: 4px 0 8px; }
-  .card {
-    min-width: 170px; max-width: 190px; background: var(--panel); border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px 12px; font-size: 13px; text-decoration: none; color: var(--ink);
+  .err { color: var(--err); background: var(--err-soft); border-color: var(--err); }
+
+  .typing { display: inline-flex; align-items: center; gap: 4px; padding: var(--space-1) 0; }
+  .typing span {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--muted);
+    animation: typing-bounce 1.2s infinite ease-in-out;
   }
-  .card b { display: block; margin-bottom: 4px; color: var(--accent); font-size: 13px; }
+  .typing span:nth-child(2) { animation-delay: .15s; }
+  .typing span:nth-child(3) { animation-delay: .3s; }
+  @keyframes typing-bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: .4; }
+    40% { transform: translateY(-4px); opacity: 1; }
+  }
+
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); padding: var(--space-1) 0 var(--space-2); }
+  .card {
+    display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); overflow: hidden; text-decoration: none; color: var(--ink);
+    box-shadow: var(--shadow-sm); transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .card:hover, .card:focus-visible { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .card .thumb {
+    position: relative; width: 100%; aspect-ratio: 4 / 3; background: var(--accent-soft);
+    display: flex; align-items: center; justify-content: center; font-size: 26px;
+  }
+  .card .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card .role-badge {
+    position: absolute; top: var(--space-2); left: var(--space-2);
+    background: var(--panel); color: var(--accent); font-size: var(--fs-xs); font-weight: 600;
+    padding: 2px var(--space-2); border-radius: var(--radius-pill); box-shadow: var(--shadow-sm);
+    white-space: nowrap;
+  }
+  .card .body { display: flex; flex-direction: column; gap: 2px; padding: var(--space-2) var(--space-3) var(--space-3); font-size: var(--fs-sm); }
+  .card b { display: block; color: var(--accent); font-size: var(--fs-base); font-weight: 600; }
+  .card .meta { color: var(--muted); font-size: var(--fs-xs); }
+  .card .price-row { display: flex; align-items: center; justify-content: space-between; margin-top: var(--space-1); }
   .card .price { font-weight: 600; }
-  .err { color: #a33; font-size: 13px; }
-  footer { background: var(--panel); border-top: 1px solid var(--border); padding: 12px 20px 16px; }
+  .card .stock { font-size: var(--fs-xs); font-weight: 600; }
+  .card .stock.limited { color: #a6741c; }
+  .card .stock.out { color: var(--muted); }
+  .card .reason { font-size: var(--fs-xs); color: var(--muted); margin-top: var(--space-1); }
+  .card .closest-note { font-size: var(--fs-xs); color: #a6741c; font-style: italic; margin-top: 2px; }
+
+  footer { background: var(--panel); border-top: 1px solid var(--border); padding: var(--space-3) var(--space-5) var(--space-4); }
   .inner { max-width: 760px; margin: 0 auto; }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .chips-label { font-size: var(--fs-xs); color: var(--muted); margin-bottom: var(--space-1); }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-3); }
   .chip {
     border: 1px solid var(--border); background: var(--accent-soft); color: var(--accent);
-    border-radius: 999px; padding: 5px 12px; font-size: 13px; cursor: pointer;
+    border-radius: var(--radius-pill); padding: 5px var(--space-3); font-size: var(--fs-sm); cursor: pointer;
   }
-  form { display: flex; gap: 8px; }
+  .chip:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+  form { display: flex; gap: var(--space-2); }
   input[type=text] {
-    flex: 1; font-size: 16px; padding: 10px 14px; border: 1px solid var(--border);
-    border-radius: 10px; outline: none; background: var(--bg);
+    flex: 1; font-size: var(--fs-md); padding: 10px var(--space-4); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); outline: none; background: var(--bg); color: var(--ink);
   }
   button[type=submit] {
-    background: var(--accent); color: #fff; border: 0; border-radius: 10px;
-    padding: 0 18px; font-size: 15px; cursor: pointer;
+    background: var(--accent); color: #fff; border: 0; border-radius: var(--radius-sm);
+    padding: 0 18px; font-size: var(--fs-base); cursor: pointer; transition: background .15s ease;
   }
+  button[type=submit]:hover:not([disabled]) { background: var(--accent-dark); }
   button[disabled] { opacity: .5; cursor: default; }
-  .notice { font-size: 11px; color: var(--muted); margin-top: 8px; }
+  input:focus-visible, button:focus-visible, .chip:focus-visible, .card:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+  .notice { font-size: var(--fs-xs); color: var(--muted); margin-top: var(--space-2); }
+
+  @media (max-width: 640px) {
+    header { padding: var(--space-3) var(--space-4); }
+    header .sub { display: block; }
+    #log { padding: var(--space-4); }
+    footer { padding: var(--space-3) var(--space-4) var(--space-4); }
+    .bubble { max-width: 92%; }
+    .cards { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 400px) {
+    header h1 { font-size: var(--fs-base); }
+    .chip { font-size: var(--fs-xs); padding: 4px var(--space-2); }
+    button[type=submit] { padding: 0 14px; }
+  }
 </style>
 </head>
 <body>
+<div class="fake-backend-banner" id="fakeBanner">
+  Demo mode — responses are canned, not AI-generated. Set <code>WINE_LLM_BACKEND=ollama</code> for real answers.
+</div>
 <header>
   <h1>🍷 Wine Agent</h1>
   <span class="sub" id="snap">demo — loading catalogue…</span>
 </header>
 
-<div id="log"></div>
+<div id="log" role="log" aria-live="polite" aria-label="Conversation"></div>
 
 <footer>
   <div class="inner">
+    <div class="chips-label">Help me choose: / Help me kiezen:</div>
     <div class="chips" id="chips">
-      <button class="chip">Red wine under €15</button>
-      <button class="chip">Which wine pairs with oysters?</button>
-      <button class="chip">Wijn bij vis tot 10 euro</button>
-      <button class="chip">What are your opening hours?</button>
+      <button class="chip" aria-label="Example question: Wine for pasta tonight">🍝 Wine for pasta tonight</button>
+      <button class="chip" aria-label="Example question: A gift for a wine lover">🎁 A gift for a wine lover</button>
+      <button class="chip" aria-label="Example question: Iets fris voor de zomer">🥂 Iets fris voor de zomer</button>
+      <button class="chip" aria-label="Example question: Best wines under €10">💸 Best wines under €10</button>
     </div>
     <form id="form">
+      <label for="input" class="sr-only">Ask about our wines / Stel je vraag</label>
       <input id="input" type="text" placeholder="Ask about our wines… / Stel je vraag…" autocomplete="off">
       <button type="submit" id="send">Send</button>
     </form>
@@ -90,8 +171,10 @@ const send = document.getElementById('send');
 let sessionId = sessionStorage.getItem('wine-session') || null;
 
 fetch('/snapshot').then(r => r.json()).then(s => {
+  const backend = s.backend ? ` · backend: ${s.backend}` : '';
   document.getElementById('snap').textContent =
-    `demo — ${s.product_count} wines, snapshot “${s.snapshot_id}”`;
+    `demo — ${s.product_count} wines${backend}, snapshot “${s.snapshot_id}”`;
+  document.getElementById('fakeBanner').classList.toggle('visible', s.backend === 'fake');
 }).catch(() => {});
 
 function el(tag, cls, text) {
@@ -107,19 +190,6 @@ function addUser(text) {
   log.appendChild(m); log.scrollTop = log.scrollHeight;
 }
 
-function addCards(cards) {
-  const row = el('div', 'cards');
-  for (const c of cards) {
-    const a = el('a', 'card');
-    if (c.url) { a.href = c.url; a.target = '_blank'; a.rel = 'noopener'; }
-    a.appendChild(el('b', null, c.name));
-    if (c.price_eur != null)
-      a.appendChild(el('span', 'price', '€' + c.price_eur.toFixed(2)));
-    row.appendChild(a);
-  }
-  log.appendChild(row); log.scrollTop = log.scrollHeight;
-}
-
 function addAssistantBubble() {
   const m = el('div', 'msg');
   const b = el('div', 'bubble', '');
@@ -128,12 +198,124 @@ function addAssistantBubble() {
   return b;
 }
 
+function showTyping(bubble) {
+  bubble.textContent = '';
+  bubble.classList.remove('err');
+  const t = el('span', 'typing');
+  t.appendChild(el('span'));
+  t.appendChild(el('span'));
+  t.appendChild(el('span'));
+  bubble.appendChild(t);
+}
+
+// Minimal, safe **bold** / "- list" renderer. Builds DOM nodes explicitly via
+// createElement/textContent — never innerHTML of model output — so streamed
+// text can never execute as markup, even if it contains "<script>" etc.
+function renderInline(parent, text) {
+  const re = /\*\*(.+?)\*\*/g;
+  let last = 0, m;
+  while ((m = re.exec(text))) {
+    if (m.index > last) parent.appendChild(document.createTextNode(text.slice(last, m.index)));
+    const strong = el('strong', null, m[1]);
+    parent.appendChild(strong);
+    last = re.lastIndex;
+  }
+  if (last < text.length) parent.appendChild(document.createTextNode(text.slice(last)));
+}
+
+function renderMarkdownish(container, text) {
+  container.textContent = '';
+  container.classList.remove('err');
+  let list = null;
+  for (const rawLine of text.split('\n')) {
+    const line = rawLine.trim();
+    if (line.startsWith('- ')) {
+      if (!list) { list = el('ul', 'md-list'); container.appendChild(list); }
+      const li = document.createElement('li');
+      renderInline(li, line.slice(2));
+      list.appendChild(li);
+      continue;
+    }
+    list = null;
+    if (line === '') continue;
+    const p = document.createElement('div');
+    renderInline(p, line);
+    container.appendChild(p);
+  }
+}
+
+const ROLE_LABELS = {
+  best_match: '🏆 Best match',
+  best_value: '💰 Best value',
+  different: '🌱 Something different',
+};
+
+const COUNTRY_FLAGS = {
+  France: '🇫🇷', Italy: '🇮🇹', Spain: '🇪🇸', Germany: '🇩🇪', Portugal: '🇵🇹',
+  Netherlands: '🇳🇱', Argentina: '🇦🇷', Australia: '🇦🇺', Austria: '🇦🇹',
+  Chile: '🇨🇱', Brazil: '🇧🇷', 'United States': '🇺🇸', USA: '🇺🇸',
+  'South Africa': '🇿🇦', 'New Zealand': '🇳🇿', Greece: '🇬🇷', Hungary: '🇭🇺',
+  Georgia: '🇬🇪', Romania: '🇷🇴', Croatia: '🇭🇷', Uruguay: '🇺🇾', Mexico: '🇲🇽',
+};
+function flagFor(country) { return COUNTRY_FLAGS[country] || '🌍'; }
+
+const STOCK_LABELS = {
+  limited: 'Only a few left / Nog maar enkele',
+  out: 'Out of stock / Niet op voorraad',
+};
+
+function addCardsBefore(node, cards) {
+  const row = el('div', 'cards');
+  for (const c of cards) {
+    const a = el('a', 'card');
+    if (c.url) { a.href = c.url; a.target = '_blank'; a.rel = 'noopener'; }
+
+    const thumb = el('div', 'thumb');
+    if (ROLE_LABELS[c.role]) thumb.appendChild(el('span', 'role-badge', ROLE_LABELS[c.role]));
+    if (c.image_url) {
+      const img = document.createElement('img');
+      img.src = c.image_url; img.alt = '';
+      thumb.appendChild(img);
+    } else {
+      thumb.appendChild(document.createTextNode('🍷'));
+    }
+    a.appendChild(thumb);
+
+    const body = el('div', 'body');
+    body.appendChild(el('b', null, c.name));
+
+    const factBits = [];
+    if (c.vintage) factBits.push(String(c.vintage));
+    if (c.grape_varieties && c.grape_varieties.length) factBits.push(c.grape_varieties.join(', '));
+    if (factBits.length) body.appendChild(el('div', 'meta', factBits.join(' · ')));
+    if (c.country) body.appendChild(el('div', 'meta', flagFor(c.country) + ' ' + c.country));
+
+    const priceRow = el('div', 'price-row');
+    if (c.price_eur != null) priceRow.appendChild(el('span', 'price', '€' + c.price_eur.toFixed(2)));
+    if (STOCK_LABELS[c.stock_status]) {
+      priceRow.appendChild(el('span', 'stock ' + c.stock_status, STOCK_LABELS[c.stock_status]));
+    }
+    body.appendChild(priceRow);
+
+    if (c.reason) body.appendChild(el('div', 'reason', c.reason));
+    if (c.closest_alternative) {
+      body.appendChild(el('div', 'closest-note', 'Closest match — nothing matched exactly'));
+    }
+
+    a.appendChild(body);
+    row.appendChild(a);
+  }
+  node.parentNode.insertBefore(row, node);
+  log.scrollTop = log.scrollHeight;
+}
+
 async function ask(text) {
   addUser(text);
   send.disabled = true;
   const bubble = addAssistantBubble();
-  bubble.textContent = '…';
+  showTyping(bubble);
   let first = true;
+  let raw = '';
   try {
     const resp = await fetch('/chat', {
       method: 'POST',
@@ -156,11 +338,11 @@ async function ask(text) {
           sessionId = ev.session_id;
           sessionStorage.setItem('wine-session', sessionId);
         } else if (ev.type === 'cards') {
-          bubble.parentElement.before(document.createElement('div'));
           addCardsBefore(bubble.parentElement, ev.cards);
         } else if (ev.type === 'token') {
           if (first) { bubble.textContent = ''; first = false; }
-          bubble.textContent += ev.text;
+          raw += ev.text;
+          renderMarkdownish(bubble, raw);
           log.scrollTop = log.scrollHeight;
         } else if (ev.type === 'error') {
           bubble.classList.add('err');
@@ -172,24 +354,10 @@ async function ask(text) {
     if (first) bubble.textContent = '(no answer)';
   } catch (e) {
     bubble.classList.add('err');
-    bubble.textContent = 'Connection error — is the server running?';
+    bubble.textContent = 'Connection error — is the server running? / Verbindingsfout — draait de server?';
   } finally {
     send.disabled = false; input.focus();
   }
-}
-
-function addCardsBefore(node, cards) {
-  const row = el('div', 'cards');
-  for (const c of cards) {
-    const a = el('a', 'card');
-    if (c.url) { a.href = c.url; a.target = '_blank'; a.rel = 'noopener'; }
-    a.appendChild(el('b', null, c.name));
-    if (c.price_eur != null)
-      a.appendChild(el('span', 'price', '€' + c.price_eur.toFixed(2)));
-    row.appendChild(a);
-  }
-  node.parentNode.insertBefore(row, node);
-  log.scrollTop = log.scrollHeight;
 }
 
 form.addEventListener('submit', (e) => {
@@ -201,7 +369,8 @@ form.addEventListener('submit', (e) => {
 });
 
 document.getElementById('chips').addEventListener('click', (e) => {
-  if (e.target.classList.contains('chip') && !send.disabled) ask(e.target.textContent);
+  const chip = e.target.closest('.chip');
+  if (chip && !send.disabled) ask(chip.textContent);
 });
 </script>
 </body>
