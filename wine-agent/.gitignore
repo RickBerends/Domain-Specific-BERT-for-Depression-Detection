@@ -14,8 +14,8 @@ venv/
 *.key
 secrets/
 
-# Data artifacts
-data/
+# Data artifacts — seed JSON under data/ is tracked; generated snapshots are not
+data/snapshot/
 raw_html/
 snapshots/
 *.sqlite

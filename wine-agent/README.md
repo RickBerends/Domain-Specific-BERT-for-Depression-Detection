@@ -27,7 +27,10 @@ See [`context/`](./context):
 
 ## Status
 
-Planning. No code yet — see the milestones section of the technical plan.
+First code landed: a runnable, end-to-end slice of the chat subsystem
+(`schemas/` + `ingest/seed.py` + `chat/`), offline by default with deterministic
+fakes and Ollama-ready via env vars. See [`CHAT.md`](./CHAT.md) to run it.
+Remaining work follows the milestones section of the technical plan.
 
 ## Note on permission
 
