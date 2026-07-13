@@ -17,7 +17,11 @@ stays env-only, is never given a real default, and is never logged. See
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+
+def _split_csv(raw: str) -> tuple[str, ...]:
+    return tuple(item.strip() for item in raw.split(",") if item.strip())
 
 
 def require_secret(name: str) -> str:
@@ -50,6 +54,19 @@ class Config:
     max_message_chars: int = int(os.getenv("WINE_MAX_MSG_CHARS", "2000"))
     history_turns: int = int(os.getenv("WINE_HISTORY_TURNS", "4"))
     session_ttl_seconds: float = float(os.getenv("WINE_SESSION_TTL", "1800"))
+
+    # --- Edge hardening (technical plan §7) ---
+    # Rate limit: max /chat requests per client within the window.
+    rate_limit_max: int = int(os.getenv("WINE_RATE_LIMIT_MAX", "20"))
+    rate_limit_window_seconds: float = float(os.getenv("WINE_RATE_LIMIT_WINDOW", "600"))
+    # Reject POST bodies larger than this before parsing (bytes).
+    max_body_bytes: int = int(os.getenv("WINE_MAX_BODY_BYTES", "16384"))
+    # CORS allowlist for the embed widget. Empty ⇒ same-origin only.
+    allowed_origins: tuple[str, ...] = field(
+        default_factory=lambda: _split_csv(os.getenv("WINE_ALLOWED_ORIGINS", ""))
+    )
+    # Trust X-Forwarded-For for the client IP (only enable behind a known proxy).
+    trust_proxy: bool = os.getenv("WINE_TRUST_PROXY", "").lower() in ("1", "true", "yes")
 
     # Path to the published snapshot (SQLite catalog + serialized vector index).
     snapshot_dir: str = os.getenv(

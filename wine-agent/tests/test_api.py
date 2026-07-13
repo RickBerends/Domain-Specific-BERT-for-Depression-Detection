@@ -9,15 +9,12 @@ from fastapi.testclient import TestClient
 
 
 @pytest.fixture()
-def client(config, monkeypatch):
-    # Point the app's cached service at the test snapshot.
+def client(config):
+    # Build a fresh app bound to the test snapshot/config.
     import chat.api as api
 
-    monkeypatch.setattr(api, "load_config", lambda: config)
-    api.get_service.cache_clear()
-    with TestClient(api.app) as c:
+    with TestClient(api.create_app(config)) as c:
         yield c
-    api.get_service.cache_clear()
 
 
 def _parse_sse(body: str) -> list[dict]:

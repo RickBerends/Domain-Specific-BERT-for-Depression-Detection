@@ -78,19 +78,37 @@ network service.
   file and vector index return 404 over HTTP, and `/snapshot` exposes only
   version metadata (counts/id), never rows (`tests/test_api.py`).
 
+## 4. Edge hardening (abuse, DoS, cross-origin)
+
+Built into the app (`chat/api.py`, `chat/ratelimit.py`), configured via env:
+
+- **Rate limiting.** A sliding-window limiter caps `/chat` requests per client
+  (`WINE_RATE_LIMIT_MAX` per `WINE_RATE_LIMIT_WINDOW`, default 20/10 min); over
+  the limit returns `429` with `Retry-After`. Blunts token-burning and scripted
+  abuse. Client identity is the peer IP, or the first `X-Forwarded-For` hop only
+  when `WINE_TRUST_PROXY` is set (enable solely behind a trusted proxy).
+- **CORS allowlist.** `WINE_ALLOWED_ORIGINS` (comma-separated) is the only set of
+  browser origins allowed to call the API; empty ⇒ no CORS headers ⇒ same-origin
+  only. Point it at the shop domain when the embed widget ships.
+- **Body-size cap.** POST bodies over `WINE_MAX_BODY_BYTES` (default 16 KiB) are
+  rejected with `413` before parsing, on top of the per-message character cap.
+- **Security headers** on every response: `Content-Security-Policy` (no external
+  code, no framing), `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`,
+  `Referrer-Policy: no-referrer`. OpenAPI docs are disabled (`docs_url=None`).
+
+All exercised by `tests/test_hardening.py`.
+
 ## Deployment posture (operators)
 
-The application controls above assume a hardened deployment (technical plan §7,
-§9). When you deploy:
+The application controls above still assume a hardened deployment (technical
+plan §7, §9). When you deploy:
 
 - Bind the DB file, the vector index, Ollama, and Phoenix to the **internal
   network only**. Expose **just** the reverse proxy (TLS) to the public.
-- Run the chat API behind the proxy; keep OpenAPI docs off (already
-  `docs_url=None`).
-- Add, at the edge, the web-hardening layer that is out of scope for the app
-  code: per-IP/session **rate limits**, a **CORS allowlist** limited to the shop
-  domain, a request **body-size cap**, and security headers (CSP for the widget
-  origin). These are tracked as the next security increment.
+- Terminate TLS at the proxy; if it sets `X-Forwarded-For`, enable
+  `WINE_TRUST_PROXY` so rate limiting keys on the real client IP. Consider a
+  second rate-limit tier at the proxy as defense-in-depth.
+- Set `WINE_ALLOWED_ORIGINS` to the shop origin(s) once the widget is embedded.
 - Give chat transcripts and Phoenix traces a retention + deletion policy; they
   contain customer text.
 

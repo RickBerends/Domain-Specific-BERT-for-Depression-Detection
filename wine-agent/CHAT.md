@@ -79,18 +79,18 @@ python -m uvicorn chat.api:app --port 8099
 See [`SECURITY.md`](./SECURITY.md). In short: the agent is read-only (no tools,
 no side effects); untrusted text (customer message, history, retrieved
 catalogue) is delimiter-neutralized before prompting (`chat/security.py`); the
-SQLite catalogue is opened read-only, parameterized, and never web-served; and
-configuration is env-only with a committed-secret scan in the test suite.
+SQLite catalogue is opened read-only, parameterized, and never web-served;
+configuration is env-only with a committed-secret scan in the test suite; and
+the API enforces per-client rate limiting, a CORS allowlist, a body-size cap,
+and security headers (`chat/ratelimit.py`, `chat/api.py`).
 
 ## Scope and next steps
 
 Built so far: hybrid retrieval with EN/NL metadata filters, staged filter
 relaxation, per-session memory (filter carry-over, "cheaper" follow-ups),
 policy routing, the demo page, two ingest sources (seed + X-Wines), and the
-application-level security controls above.
-Not yet built (edge/web hardening, tracked in SECURITY.md): rate limiting,
-CORS allowlist, and security headers (§7); plus real Phoenix evals (§5.5 — the
-tracing seam is in place), a golden eval set, the fixture-shop generator and
-crawler from
+security controls above (application + edge).
+Not yet built: real Phoenix evals (§5.5 — the tracing seam is in place), a
+golden eval set, the fixture-shop generator and crawler from
 [`context/03-data-acquisition-plan.md`](./context/03-data-acquisition-plan.md),
 and the real Preact `embed.js` widget (§6) that replaces the demo page.
