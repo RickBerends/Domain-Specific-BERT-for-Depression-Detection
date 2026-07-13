@@ -36,6 +36,15 @@ def test_demo_page_served(client):
     assert "Wine Agent" in resp.text
 
 
+def test_demo_renders_uniform_thumbnails(client):
+    # Regression guard: product-card images must render at a fixed size.
+    html = client.get("/demo").text
+    assert ".thumb" in html
+    assert "object-fit: cover" in html  # differently-shaped images cropped to one box
+    assert "height: 120px" in html      # fixed thumbnail height
+    assert "makeThumb" in html          # placeholder-or-image tile per card
+
+
 def test_snapshot_endpoint(client):
     data = client.get("/snapshot").json()
     assert data["snapshot_id"] == "test"

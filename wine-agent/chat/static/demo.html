@@ -29,13 +29,26 @@
     background: var(--panel); border: 1px solid var(--border);
   }
   .user .bubble { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .cards { display: flex; gap: 10px; overflow-x: auto; padding: 4px 0 8px; }
+  .cards { display: flex; gap: 10px; overflow-x: auto; padding: 4px 0 8px; align-items: stretch; }
   .card {
-    min-width: 170px; max-width: 190px; background: var(--panel); border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px 12px; font-size: 13px; text-decoration: none; color: var(--ink);
+    flex: 0 0 172px; width: 172px; display: flex; flex-direction: column; gap: 6px;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px; font-size: 13px; text-decoration: none; color: var(--ink);
   }
-  .card b { display: block; margin-bottom: 4px; color: var(--accent); font-size: 13px; }
-  .card .price { font-weight: 600; }
+  /* Fixed-size thumbnail: every image is cropped to the same box (object-fit:
+     cover), and a placeholder fills that same box when an image is missing or
+     fails to load — so all cards render at an identical size. */
+  .card .thumb {
+    width: 100%; height: 120px; border-radius: 8px; overflow: hidden;
+    background: linear-gradient(135deg, var(--accent-soft), #fbf6f2);
+    display: flex; align-items: center; justify-content: center; font-size: 34px;
+  }
+  .card .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card b {
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden; min-height: 2.5em; color: var(--accent); font-size: 13px;
+  }
+  .card .price { font-weight: 600; margin-top: auto; }
   .err { color: #a33; font-size: 13px; }
   footer { background: var(--panel); border-top: 1px solid var(--border); padding: 12px 20px 16px; }
   .inner { max-width: 760px; margin: 0 auto; }
@@ -107,17 +120,39 @@ function addUser(text) {
   log.appendChild(m); log.scrollTop = log.scrollHeight;
 }
 
-function addCards(cards) {
+// One uniform thumbnail per card. The placeholder is always present; a real
+// image (if any) is layered on top and only revealed once it successfully
+// loads — a broken/blocked URL simply leaves the placeholder, keeping sizes
+// identical. (Production note: to show real photos, add the shop's image host
+// to the Content-Security-Policy img-src in chat/api.py.)
+function makeThumb(c) {
+  const thumb = el('div', 'thumb');
+  const placeholder = el('span', 'ph', '🍷');
+  thumb.appendChild(placeholder);
+  if (c.image_url) {
+    const img = document.createElement('img');
+    img.loading = 'lazy';
+    img.alt = c.name;
+    img.addEventListener('load', () => { placeholder.style.display = 'none'; });
+    img.addEventListener('error', () => { img.remove(); });
+    img.src = c.image_url;
+    thumb.appendChild(img);
+  }
+  return thumb;
+}
+
+function renderCards(cards) {
   const row = el('div', 'cards');
   for (const c of cards) {
     const a = el('a', 'card');
     if (c.url) { a.href = c.url; a.target = '_blank'; a.rel = 'noopener'; }
+    a.appendChild(makeThumb(c));
     a.appendChild(el('b', null, c.name));
     if (c.price_eur != null)
       a.appendChild(el('span', 'price', '€' + c.price_eur.toFixed(2)));
     row.appendChild(a);
   }
-  log.appendChild(row); log.scrollTop = log.scrollHeight;
+  return row;
 }
 
 function addAssistantBubble() {
@@ -156,8 +191,8 @@ async function ask(text) {
           sessionId = ev.session_id;
           sessionStorage.setItem('wine-session', sessionId);
         } else if (ev.type === 'cards') {
-          bubble.parentElement.before(document.createElement('div'));
-          addCardsBefore(bubble.parentElement, ev.cards);
+          bubble.parentElement.before(renderCards(ev.cards));
+          log.scrollTop = log.scrollHeight;
         } else if (ev.type === 'token') {
           if (first) { bubble.textContent = ''; first = false; }
           bubble.textContent += ev.text;
@@ -176,20 +211,6 @@ async function ask(text) {
   } finally {
     send.disabled = false; input.focus();
   }
-}
-
-function addCardsBefore(node, cards) {
-  const row = el('div', 'cards');
-  for (const c of cards) {
-    const a = el('a', 'card');
-    if (c.url) { a.href = c.url; a.target = '_blank'; a.rel = 'noopener'; }
-    a.appendChild(el('b', null, c.name));
-    if (c.price_eur != null)
-      a.appendChild(el('span', 'price', '€' + c.price_eur.toFixed(2)));
-    row.appendChild(a);
-  }
-  node.parentNode.insertBefore(row, node);
-  log.scrollTop = log.scrollHeight;
 }
 
 form.addEventListener('submit', (e) => {
