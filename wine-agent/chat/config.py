@@ -5,12 +5,36 @@ tests pass with zero external services (the "runnable offline" requirement).
 Set ``WINE_LLM_BACKEND=ollama`` / ``WINE_EMBED_BACKEND=ollama`` to use a local
 Ollama, per technical plan §5.4. Nothing else in the code changes — that is the
 point of the adapter seam.
+
+Secrets policy (technical plan §7): configuration is read only from environment
+variables — never hard-coded, never committed. The app currently needs no
+secrets at all (Ollama is local and unauthenticated). Any secret added later (a
+hosted-LLM key, a widget site token) MUST be read via ``require_secret`` so it
+stays env-only, is never given a real default, and is never logged. See
+``.env.example`` and ``SECURITY.md``.
 """
 
 from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+
+
+def require_secret(name: str) -> str:
+    """Fetch a required secret from the environment.
+
+    Sanctioned accessor for anything sensitive: raises if unset rather than
+    falling back to a baked-in default, and (unlike a plain ``os.getenv`` at
+    call sites) keeps secret handling in one auditable place. The value is
+    returned but never logged here.
+    """
+    value = os.environ.get(name)
+    if not value:
+        raise RuntimeError(
+            f"Missing required secret {name!r}. Set it in the environment "
+            "(see .env.example); never hard-code or commit it."
+        )
+    return value
 
 
 @dataclass(frozen=True)

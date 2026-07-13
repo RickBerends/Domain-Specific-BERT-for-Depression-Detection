@@ -30,10 +30,15 @@ class SnapshotReader:
                 f"No published snapshot at {snapshot_dir!r}. "
                 "Build one first: python -m ingest.seed"
             )
-        # read-only, shareable across request threads
+        # read-only, shareable across request threads. `mode=ro` refuses any
+        # write; `query_only` and `trusted_schema=OFF` are defense-in-depth so a
+        # tampered snapshot file can't run schema-defined code or mutations
+        # (technical plan §7). All queries below are parameterized.
         self._db = sqlite3.connect(
             f"file:{db_path}?mode=ro", uri=True, check_same_thread=False
         )
+        self._db.execute("PRAGMA query_only = ON")
+        self._db.execute("PRAGMA trusted_schema = OFF")
         self._db.row_factory = sqlite3.Row
         self._vectors = InMemoryVectorIndex.load(
             os.path.join(snapshot_dir, VECTORS_JSON)

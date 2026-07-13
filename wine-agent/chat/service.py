@@ -19,6 +19,7 @@ from chat.llm import LLMClient
 from chat.planner import Filters, plan
 from chat.prompt import SYSTEM_PROMPT, build_user_message
 from chat.retriever import HybridRetriever
+from chat.security import looks_like_injection
 from chat.sessions import SessionStore
 from chat.snapshot import SnapshotReader
 from chat.tracing import span
@@ -56,7 +57,13 @@ class ChatService:
         turn_plan = plan(message)
         filters = self._effective_filters(turn_plan, session)
 
+        # Flag likely injection attempts for review. We do NOT reject them:
+        # neutralization + the read-only design already contain the risk, and a
+        # blocklist would only frustrate legitimate customers with false hits.
+        suspected_injection = looks_like_injection(message)
+
         with span("retrieve", query=message, session_id=session_id) as sp:
+            sp.set_attribute("security.injection_suspected", suspected_injection)
             if turn_plan.route == "policy":
                 result = self.retriever.retrieve_policy(message)
             else:

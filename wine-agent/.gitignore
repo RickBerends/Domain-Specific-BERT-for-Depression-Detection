@@ -10,6 +10,7 @@ venv/
 # Env & secrets — never commit these
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 secrets/

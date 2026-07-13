@@ -45,6 +45,27 @@ def test_snapshot_endpoint(client):
     assert data["product_count"] == 20
 
 
+def test_snapshot_exposes_only_metadata(client):
+    # /snapshot must leak version metadata only — never catalogue rows.
+    data = client.get("/snapshot").json()
+    assert set(data) <= {
+        "snapshot_id", "created_at", "published", "product_count", "content_count",
+    }
+    assert "json" not in data and "products" not in data
+
+
+def test_database_file_not_web_reachable(client):
+    # The SQLite catalogue is a local file, never a served route.
+    for path in (
+        "/catalog.db",
+        "/data/snapshot/catalog.db",
+        "/snapshot/catalog.db",
+        "/vectors.json",
+        "/static/../snapshot/catalog.db",
+    ):
+        assert client.get(path).status_code == 404, path
+
+
 def test_chat_sse_stream(client):
     resp = client.post("/chat", json={"message": "Do you have a Chianti?"})
     assert resp.status_code == 200
