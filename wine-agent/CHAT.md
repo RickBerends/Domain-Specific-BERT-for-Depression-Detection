@@ -91,7 +91,12 @@ relaxation, per-session memory (filter carry-over, "cheaper" follow-ups),
 policy routing, the demo page, two ingest sources (seed + X-Wines), and the
 security controls above (application + edge).
 
+The ingest pipeline (roadmap Phase 3) is now built too: `python -m ingest.crawl
+--serve-fixture` generates a mock shop, crawls it politely, parses it back into
+the `Product`/`Content` contract, runs validation gates, and publishes a
+snapshot only if they pass — the same catalogue the chat then serves.
+
 Everything still to build lives in the master roadmap:
-[`context/04-roadmap.md`](./context/04-roadmap.md). Next up (P0, Phase 3):
-the fixture-shop generator + crawler/parsers/validation gates that prove the
-ingest pipeline end-to-end.
+[`context/04-roadmap.md`](./context/04-roadmap.md). Next up: snapshot
+versioning + rollback and hot reload (deferred half of Phase 3), then the
+golden eval set + offline eval runner (Phase 5).

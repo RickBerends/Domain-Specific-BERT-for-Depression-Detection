@@ -12,6 +12,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
+# Ingest/scraping pipeline (roadmap Phase 3): HTML parsing for the crawler.
+ingest = ["selectolax>=0.3"]
 # Enables real tracing to Arize Phoenix (technical plan §5.5); optional.
 tracing = ["arize-phoenix-otel", "openinference-instrumentation"]
 

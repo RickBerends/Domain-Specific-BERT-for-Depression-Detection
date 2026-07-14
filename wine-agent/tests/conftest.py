@@ -47,3 +47,23 @@ def reader(snapshot_dir: str) -> SnapshotReader:
 @pytest.fixture()
 def service(config: Config) -> ChatService:
     return build_service(config)
+
+
+@pytest.fixture(scope="session")
+def crawled_pages(tmp_path_factory):
+    """Generate a small fixture shop, crawl it once, return (manifest, pages, stats)."""
+    from ingest.crawler import Crawler, CrawlConfig
+    from ingest.fixture_shop import generate, load_fixture_products, serve_fixture
+
+    fixture_dir = str(tmp_path_factory.mktemp("fixture"))
+    work_dir = str(tmp_path_factory.mktemp("crawl"))
+    manifest = generate(fixture_dir, load_fixture_products(20))
+    server, port = serve_fixture(fixture_dir)
+    try:
+        crawler = Crawler(f"http://127.0.0.1:{port}", work_dir, CrawlConfig(delay_seconds=0))
+        stats = crawler.crawl()
+        pages = crawler.pages()
+        crawler.close()
+    finally:
+        server.shutdown()
+    return manifest, pages, stats

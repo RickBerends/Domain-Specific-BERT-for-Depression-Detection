@@ -31,6 +31,13 @@ quality · **P3** = after/with client onboarding · **P4** = nice-to-have.
 side; this phase builds the actual scraping architecture against a safe target
 so the client crawl later is a config change, not new engineering.*
 
+> **Status: DONE (3.1–3.4 core).** `ingest/fixture_shop.py`, `crawler.py`,
+> `parsers.py`, `validate.py`, `pipeline.py`, driver `python -m ingest.crawl`.
+> Full loop verified: generate → crawl → parse → validate → publish → chat
+> serves it. **Deferred to a follow-up:** multi-snapshot versioning dirs +
+> rollback pointer (the lifecycle half of 3.4) and hot reload (3.5) — publishing
+> currently goes into the single configured snapshot dir via `build_snapshot`.
+
 ### 3.1 Fixture-shop generator (P0)
 Static-HTML mock wine shop generated from ~200 snapshot rows (X-Wines + seed),
 mirroring the van Bilsen URL map (addendum §2) and field quirks (addendum §3):
