@@ -17,9 +17,13 @@ from schemas import ColorType
 _COLOR_WORDS: dict[str, ColorType] = {
     # EN
     "red": ColorType.red,
+    "reds": ColorType.red,
     "white": ColorType.white,
+    "whites": ColorType.white,
     "rosé": ColorType.rose,
     "rose": ColorType.rose,
+    "roses": ColorType.rose,
+    "rosés": ColorType.rose,
     "sparkling": ColorType.sparkling,
     "bubbles": ColorType.sparkling,
     "champagne": ColorType.sparkling,
@@ -33,11 +37,62 @@ _COLOR_WORDS: dict[str, ColorType] = {
     "rode": ColorType.red,
     "wit": ColorType.white,
     "witte": ColorType.white,
+    "witwijn": ColorType.white,
+    "roodwijn": ColorType.red,
     "mousserend": ColorType.sparkling,
     "mousserende": ColorType.sparkling,
     "bubbels": ColorType.sparkling,
     "dessertwijn": ColorType.dessert,
+    # Grape/varietal names that are unambiguously one colour. Ambiguous ones
+    # (bare "pinot", "moscato" — which span multiple colours/styles) are
+    # deliberately excluded rather than guessed.
+    "chardonnay": ColorType.white,
+    "riesling": ColorType.white,
+    "viognier": ColorType.white,
+    "albariño": ColorType.white,
+    "albarino": ColorType.white,
+    "verdejo": ColorType.white,
+    "godello": ColorType.white,
+    "vermentino": ColorType.white,
+    "assyrtiko": ColorType.white,
+    "gewürztraminer": ColorType.white,
+    "gewurztraminer": ColorType.white,
+    "trebbiano": ColorType.white,
+    "grüner": ColorType.white,
+    "gruner": ColorType.white,
+    "merlot": ColorType.red,
+    "malbec": ColorType.red,
+    "syrah": ColorType.red,
+    "shiraz": ColorType.red,
+    "tempranillo": ColorType.red,
+    "sangiovese": ColorType.red,
+    "zinfandel": ColorType.red,
+    "nebbiolo": ColorType.red,
+    "grenache": ColorType.red,
+    "garnacha": ColorType.red,
+    "carignan": ColorType.red,
+    "mourvèdre": ColorType.red,
+    "mourvedre": ColorType.red,
+    "cabernet": ColorType.red,
 }
+
+# Two-word varietal phrases where the single first token would be ambiguous
+# on its own (e.g. bare "pinot" or "sauvignon").
+_COLOR_PHRASES: dict[tuple[str, str], ColorType] = {
+    ("sauvignon", "blanc"): ColorType.white,
+    ("pinot", "grigio"): ColorType.white,
+    ("pinot", "gris"): ColorType.white,
+    ("pinot", "blanc"): ColorType.white,
+    ("pinot", "noir"): ColorType.red,
+    ("cabernet", "sauvignon"): ColorType.red,
+    ("cabernet", "franc"): ColorType.red,
+}
+
+# Negation cues (EN + NL). Colour/varietal words within a short window after
+# one of these are excluded from candidacy, so "not red, I'd like white"
+# doesn't lock onto "red" just because it appears first in the sentence.
+_NEGATION_WORDS = frozenset({"not", "no", "dont", "isnt", "aint", "niet", "geen"})
+_NEGATION_WINDOW = 3
 
 _COUNTRY_WORDS: dict[str, str] = {
     "france": "France", "french": "France", "frankrijk": "France", "franse": "France",
@@ -81,6 +136,30 @@ _MIN_PRICE_RE = re.compile(
 
 _CHEAPER_WORDS = ("cheaper", "less expensive", "goedkoper", "goedkopere", "voordeliger")
 
+# Generic "just pick something for me" phrasing, with no specific wine name,
+# grape, region, or style cue — distinct from e.g. "Chianti Classico" or "do
+# you have a Chianti?", which have no colour/price/country filter either but
+# ARE specific (a proper-noun wine name) and retrieve just fine as-is.
+_VAGUE_SIGNAL_WORDS = (
+    # EN
+    "wine", "bottle", "something", "recommend", "recommendation", "suggest",
+    "suggestion", "help", "gift", "occasion", "need", "looking",
+    # NL
+    "wijn", "fles", "iets", "aanraden", "aanbeveling", "advies", "adviseer",
+    "hulp", "cadeau", "gelegenheid", "nodig", "zoek",
+)
+
+
+def is_vague_request(message: str) -> bool:
+    """True for generic requests with no specific wine/grape/region name or
+    style cue — used by ``chat.service.ChatService`` to ask a clarifying
+    question instead of guessing, rather than every filter-less message
+    (which would also wrongly catch specific searches like "Chianti
+    Classico").
+    """
+    tokens = re.findall(r"[a-zà-ÿ0-9]+", message.lower().replace("'", ""))
+    return any(tok in _VAGUE_SIGNAL_WORDS for tok in tokens)
+
 
 @dataclass
 class Filters:
@@ -114,8 +193,25 @@ def plan(message: str) -> Plan:
         return Plan(route="policy")
 
     filters = Filters()
-    tokens = re.findall(r"[a-zà-ÿ0-9]+", text)
-    for tok in tokens:
+    # Apostrophes are dropped before tokenizing so contractions ("don't",
+    # "isn't") collapse to the negation cues in _NEGATION_WORDS.
+    tokens = re.findall(r"[a-zà-ÿ0-9]+", text.replace("'", ""))
+
+    negated = set()
+    for i, tok in enumerate(tokens):
+        if tok in _NEGATION_WORDS:
+            negated.update(range(i + 1, min(i + 1 + _NEGATION_WINDOW, len(tokens))))
+
+    for i in range(len(tokens) - 1):
+        if i in negated or (i + 1) in negated:
+            continue
+        color = _COLOR_PHRASES.get((tokens[i], tokens[i + 1]))
+        if color is not None and filters.color_type is None:
+            filters.color_type = color
+
+    for i, tok in enumerate(tokens):
+        if i in negated:
+            continue
         if filters.color_type is None and tok in _COLOR_WORDS:
             filters.color_type = _COLOR_WORDS[tok]
         if filters.country is None and tok in _COUNTRY_WORDS:

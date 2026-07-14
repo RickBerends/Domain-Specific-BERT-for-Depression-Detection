@@ -1,0 +1,16 @@
+Metadata-Version: 2.4
+Name: wine-agent
+Version: 0.1.0
+Summary: Grounded conversational agent for a wine shop — chat subsystem (first slice)
+Requires-Python: >=3.11
+Requires-Dist: pydantic>=2
+Requires-Dist: fastapi>=0.110
+Requires-Dist: uvicorn>=0.27
+Requires-Dist: httpx>=0.27
+Provides-Extra: dev
+Requires-Dist: pytest>=8; extra == "dev"
+Provides-Extra: tracing
+Requires-Dist: arize-phoenix-otel; extra == "tracing"
+Requires-Dist: openinference-instrumentation; extra == "tracing"
+Provides-Extra: groq
+Requires-Dist: openai>=1.0; extra == "groq"

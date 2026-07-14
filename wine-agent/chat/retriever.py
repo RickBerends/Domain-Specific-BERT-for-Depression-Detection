@@ -35,6 +35,68 @@ class RetrievalResult:
         return not self.products and not self.contents
 
 
+@dataclass
+class Recommendation:
+    product: Product
+    role: str  # "best_match" | "best_value" | "different"
+    reason: str
+
+
+def select_recommendations(products: list[Product], limit: int = 3) -> list[Recommendation]:
+    """Curate up to ``limit`` labeled picks from an already-ranked product list.
+
+    Rather than just showing raw top-N results, pick three complementary
+    roles: the top-ranked match, the cheapest option that still qualified,
+    and the most diverse remaining pick (different country or grape variety
+    from the top match) — so each card has a clear, honest reason to exist.
+    Reasons are deterministic templates built from real product fields, never
+    LLM-generated, so they're free and identical across both LLM backends.
+    """
+    if not products:
+        return []
+
+    picks: list[Recommendation] = []
+    used: set[str] = set()
+
+    best_match = products[0]
+    picks.append(Recommendation(best_match, "best_match", "Closest match to your request"))
+    used.add(best_match.slug)
+
+    priced = [p for p in products if p.slug not in used and p.price_cents is not None]
+    if priced:
+        best_value = min(priced, key=lambda p: p.price_cents)
+        picks.append(
+            Recommendation(best_value, "best_value", "The best-value option that still fits your request")
+        )
+        used.add(best_value.slug)
+
+    def _is_different(p: Product) -> bool:
+        if p.country and best_match.country and p.country != best_match.country:
+            return True
+        grapes = set(p.grape_varieties)
+        match_grapes = set(best_match.grape_varieties)
+        return bool(grapes) and not (grapes & match_grapes)
+
+    remaining = [p for p in products if p.slug not in used]
+    different = next((p for p in remaining if _is_different(p)), None) or (
+        remaining[0] if remaining else None
+    )
+    if different is not None:
+        bits = [
+            b
+            for b in (
+                different.country if different.country != best_match.country else None,
+                different.grape_varieties[0] if different.grape_varieties else None,
+            )
+            if b
+        ]
+        detail = " ".join(bits) if bits else "a different style"
+        picks.append(Recommendation(different, "different", f"Something different — {detail}"))
+        used.add(different.slug)
+
+    return picks[:limit]
+
+
 def _matches(hit: VectorHit, filters: Filters) -> bool:
     meta = hit.metadata
     if filters.color_type is not None and meta.get("color_type") != filters.color_type.value:

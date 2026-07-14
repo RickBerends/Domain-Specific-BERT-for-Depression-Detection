@@ -127,16 +127,46 @@ class ProductCard(BaseModel):
     currency: str = "EUR"
     image_url: str | None = None
     url: str | None = None
+    # Real product facts (already on Product, just not previously surfaced on
+    # the card) — no fabricated ratings/awards/review data is ever added here.
+    grape_varieties: list[str] = Field(default_factory=list)
+    country: str | None = None
+    vintage: int | None = None
+    stock_status: StockStatus = StockStatus.in_stock
+    # True when this card didn't fully satisfy the customer's stated filters
+    # and the retriever had to relax them to find anything (chat.retriever
+    # .RetrievalResult.relaxed) — lets the UI show an honest "closest
+    # alternative" badge instead of presenting it as a perfect match.
+    closest_alternative: bool = False
+    # Curated recommendation slot (chat.retriever.select_recommendations):
+    # "best_match" | "best_value" | "different" | None, with a short,
+    # data-driven reason — never LLM-generated.
+    role: str | None = None
+    reason: str | None = None
 
     @classmethod
-    def from_product(cls, p: Product) -> "ProductCard":
+    def from_product(
+        cls,
+        p: Product,
+        closest_alternative: bool = False,
+        role: str | None = None,
+        reason: str | None = None,
+        fallback_image_url: str | None = None,
+    ) -> "ProductCard":
         return cls(
             slug=p.slug,
             name=p.name,
             price_eur=p.price_eur,
             currency=p.currency,
-            image_url=str(p.image_url) if p.image_url else None,
+            image_url=str(p.image_url) if p.image_url else fallback_image_url,
             url=str(p.url) if p.url else None,
+            grape_varieties=p.grape_varieties[:2],
+            country=p.country,
+            vintage=p.vintage,
+            stock_status=p.stock_status,
+            closest_alternative=closest_alternative,
+            role=role,
+            reason=reason,
         )
 
 

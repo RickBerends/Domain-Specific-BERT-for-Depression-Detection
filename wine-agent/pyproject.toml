@@ -16,6 +16,10 @@ dev = ["pytest>=8"]
 ingest = ["selectolax>=0.3"]
 # Enables real tracing to Arize Phoenix (technical plan §5.5); optional.
 tracing = ["arize-phoenix-otel", "openinference-instrumentation"]
+# Groq's API is OpenAI-compatible — the official openai client just needs a
+# different base_url (chat/llm.py's GroqLLM). Optional: most runs use the
+# fake or Ollama backend and don't need this installed.
+groq = ["openai>=1.0"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="e4adf902-ed66-44fa-bc5a-5d91ae503070" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/wine-agent/context/interrupted_plan.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wine-agent/feedback.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wine-agent/img/img1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wine-agent/img/img2.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wine-agent/img/img3.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Fine_tuneBert.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wine-agent/CHAT.md" beforeDir="false" afterPath="$PROJECT_DIR$/wine-agent/CHAT.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wine-agent/chat/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/wine-agent/chat/api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wine-agent/chat/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/wine-agent/chat/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wine-agent/chat/llm.py" beforeDir="false" afterPath="$PROJECT_DIR$/wine-agent/chat/llm.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wine-agent/chat/planner.py" beforeDir="false" afterPath="$PROJECT_DIR$/wine-agent/chat/planner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wine-agent/chat/prompt.py" beforeDir="false" afterPath="$PROJECT_DIR$/wine-agent/chat/prompt.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wine-agent/chat/retriever.py" beforeDir="false" afterPath="$PROJECT_DIR$/wine-agent/chat/retriever.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wine-agent/chat/service.py" beforeDir="false" afterPath="$PROJECT_DIR$/wine-agent/chat/service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wine-agent/chat/static/demo.html" beforeDir="false" afterPath="$PROJECT_DIR$/wine-agent/chat/static/demo.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wine-agent/context/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/wine-agent/context/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wine-agent/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/wine-agent/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wine-agent/schemas/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/wine-agent/schemas/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wine-agent/tests/test_chat_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/wine-agent/tests/test_chat_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wine-agent/tests/test_planner.py" beforeDir="false" afterPath="$PROJECT_DIR$/wine-agent/tests/test_planner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wine-agent/tests/test_retriever.py" beforeDir="false" afterPath="$PROJECT_DIR$/wine-agent/tests/test_retriever.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 2,
+  "fromUser": false
+}]]></component>
+  <component name="ProjectId" id="3GPDv1erO5kCHDj7FC5kefLVBEH" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Xgaming/IdeaProjects/wine-app/wine-agent/img",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Xgaming\IdeaProjects\wine-app\wine-agent\img" />
+    </key>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="e4adf902-ed66-44fa-bc5a-5d91ae503070" name="Changes" comment="" />
+      <created>1783864538483</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1783864538483</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
