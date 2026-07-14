@@ -11,7 +11,28 @@ else in the code changes — that is the point of the adapter seam.
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+
+def _split_csv(raw: str) -> tuple[str, ...]:
+    return tuple(item.strip() for item in raw.split(",") if item.strip())
+
+
+def require_secret(name: str) -> str:
+    """Fetch a required secret from the environment.
+
+    Sanctioned accessor for anything sensitive: raises if unset rather than
+    falling back to a baked-in default, and (unlike a plain ``os.getenv`` at
+    call sites) keeps secret handling in one auditable place. The value is
+    returned but never logged here.
+    """
+    value = os.environ.get(name)
+    if not value:
+        raise RuntimeError(
+            f"Missing required secret {name!r}. Set it in the environment "
+            "(see .env.example); never hard-code or commit it."
+        )
+    return value
 
 
 @dataclass(frozen=True)

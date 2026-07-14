@@ -9,15 +9,12 @@ from fastapi.testclient import TestClient
 
 
 @pytest.fixture()
-def client(config, monkeypatch):
-    # Point the app's cached service at the test snapshot.
+def client(config):
+    # Build a fresh app bound to the test snapshot/config.
     import chat.api as api
 
-    monkeypatch.setattr(api, "load_config", lambda: config)
-    api.get_service.cache_clear()
-    with TestClient(api.app) as c:
+    with TestClient(api.create_app(config)) as c:
         yield c
-    api.get_service.cache_clear()
 
 
 def _parse_sse(body: str) -> list[dict]:
@@ -39,10 +36,40 @@ def test_demo_page_served(client):
     assert "Wine Agent" in resp.text
 
 
+def test_demo_renders_uniform_thumbnails(client):
+    # Regression guard: product-card images must render at a fixed size.
+    html = client.get("/demo").text
+    assert ".thumb" in html
+    assert "object-fit: cover" in html  # differently-shaped images cropped to one box
+    assert "height: 120px" in html      # fixed thumbnail height
+    assert "makeThumb" in html          # placeholder-or-image tile per card
+
+
 def test_snapshot_endpoint(client):
     data = client.get("/snapshot").json()
     assert data["snapshot_id"] == "test"
     assert data["product_count"] == 20
+
+
+def test_snapshot_exposes_only_metadata(client):
+    # /snapshot must leak version metadata only — never catalogue rows.
+    data = client.get("/snapshot").json()
+    assert set(data) <= {
+        "snapshot_id", "created_at", "published", "product_count", "content_count",
+    }
+    assert "json" not in data and "products" not in data
+
+
+def test_database_file_not_web_reachable(client):
+    # The SQLite catalogue is a local file, never a served route.
+    for path in (
+        "/catalog.db",
+        "/data/snapshot/catalog.db",
+        "/snapshot/catalog.db",
+        "/vectors.json",
+        "/static/../snapshot/catalog.db",
+    ):
+        assert client.get(path).status_code == 404, path
 
 
 def test_chat_sse_stream(client):

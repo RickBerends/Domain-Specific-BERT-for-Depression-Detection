@@ -10,6 +10,7 @@ venv/
 # Env & secrets — never commit these
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 secrets/
@@ -17,6 +18,9 @@ secrets/
 # Data artifacts — seed JSON under data/ is tracked; generated/downloaded are not
 data/snapshot/
 data/external/
+data/fixture_shop/
+data/reports/
+crawl.db
 raw_html/
 snapshots/
 *.sqlite

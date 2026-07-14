@@ -141,7 +141,7 @@ def build_user_message(
     for p in result.products:
         lines.append(f"- {_product_line(p, role_by_slug.get(p.slug))}")
     for c in result.contents:
-        lines.append(f"- {c.title}: {c.body_text}")
+        lines.append(f"- {neutralize(c.title)}: {neutralize(c.body_text)}")
 
     context = "\n".join(lines) if lines else "(no matching shop data)"
     if result.relaxed and lines:
@@ -156,7 +156,7 @@ def build_user_message(
     history_block = ""
     if history:
         turns = "\n".join(
-            f"{role}: {text[:200]}" for role, text in history
+            f"{role}: {neutralize(text[:200])}" for role, text in history
         )
         history_block = f"[HISTORY]\n{turns}\n[/HISTORY]\n\n"
 

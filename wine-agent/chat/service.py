@@ -99,6 +99,7 @@ class ChatService:
             return
 
         with span("retrieve", query=message, session_id=session_id) as sp:
+            sp.set_attribute("security.injection_suspected", suspected_injection)
             if turn_plan.route == "policy":
                 result = self.retriever.retrieve_policy(message)
             else:

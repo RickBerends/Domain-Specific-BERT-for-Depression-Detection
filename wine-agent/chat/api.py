@@ -1,13 +1,16 @@
-"""FastAPI surface (technical plan §5.6).
+"""FastAPI surface (technical plan §5.6) with edge hardening (§7).
 
     POST /chat      → Server-Sent Events: token events + one final structured
                       event carrying product cards and the snapshot id
     GET  /health    → liveness
+    GET  /demo      → self-contained demo chat page
     GET  /snapshot  → the catalogue version currently being served
 
-The service (and thus the snapshot) is built once, lazily, and cached. Backends
-are chosen entirely by environment (see ``chat.config``), so the same app runs
-with deterministic fakes or against a local Ollama with no code change.
+The app is built by ``create_app(config)`` so the whole surface — including the
+rate limiter, CORS allowlist, security headers and body-size cap — is bound to
+one config and is fully testable. The service (and thus the snapshot) is built
+lazily on first use and cached on ``app.state``. Backends are chosen entirely by
+environment (see ``chat.config``).
 """
 
 from __future__ import annotations
@@ -20,12 +23,14 @@ from contextlib import asynccontextmanager
 from functools import lru_cache
 from typing import AsyncIterator, Iterator
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from chat.config import load_config
+from chat.config import Config, load_config
+from chat.ratelimit import RateLimiter
 from chat.service import ChatService, build_service
 
 logger = logging.getLogger("wine_agent.chat")
@@ -57,11 +62,6 @@ if os.path.isdir(_IMG_DIR):
 class ChatRequest(BaseModel):
     message: str
     session_id: str | None = Field(default=None)
-
-
-@lru_cache(maxsize=1)
-def get_service() -> ChatService:
-    return build_service(load_config())
 
 
 def _sse(event: dict) -> str:

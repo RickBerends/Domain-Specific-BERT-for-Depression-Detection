@@ -203,6 +203,16 @@ if `/img` isn't present at all (e.g. a fresh checkout without those files),
 cards fall back to a deterministic, colour-coded generated placeholder (via
 `placehold.co`, `WINE_PLACEHOLDER_IMAGE_BASE_URL` to point it elsewhere).
 
+## Security
+
+See [`SECURITY.md`](./SECURITY.md). In short: the agent is read-only (no tools,
+no side effects); untrusted text (customer message, history, retrieved
+catalogue) is delimiter-neutralized before prompting (`chat/security.py`); the
+SQLite catalogue is opened read-only, parameterized, and never web-served;
+configuration is env-only with a committed-secret scan in the test suite; and
+the API enforces per-client rate limiting, a CORS allowlist, a body-size cap,
+and security headers (`chat/ratelimit.py`, `chat/api.py`).
+
 ## Scope and next steps
 
 Built so far: hybrid retrieval with EN/NL metadata filters (including

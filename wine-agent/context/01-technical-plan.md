@@ -191,6 +191,10 @@ Single VPS to start (8 vCPU / 16 GB RAM is comfortable for a quantized 7–8B mo
 
 ## 10. Milestones
 
+> **Superseded.** The current milestone plan lives in
+> [`04-roadmap.md`](./04-roadmap.md); the list below is the original sketch,
+> kept for context.
+
 1. **Week 1:** repo scaffolding, `schemas` package, sitemap crawl, 20 products parsed end-to-end.
 2. **Week 2:** full catalog + content scrape, validation gates, snapshot publishing, diff reports.
 3. **Week 3:** hybrid retrieval + FastAPI chat MVP, Ollama wired, Phoenix tracing live.
