@@ -90,7 +90,8 @@ Built so far: hybrid retrieval with EN/NL metadata filters, staged filter
 relaxation, per-session memory (filter carry-over, "cheaper" follow-ups),
 policy routing, the demo page, two ingest sources (seed + X-Wines), and the
 security controls above (application + edge).
-Not yet built: real Phoenix evals (§5.5 — the tracing seam is in place), a
-golden eval set, the fixture-shop generator and crawler from
-[`context/03-data-acquisition-plan.md`](./context/03-data-acquisition-plan.md),
-and the real Preact `embed.js` widget (§6) that replaces the demo page.
+
+Everything still to build lives in the master roadmap:
+[`context/04-roadmap.md`](./context/04-roadmap.md). Next up (P0, Phase 3):
+the fixture-shop generator + crawler/parsers/validation gates that prove the
+ingest pipeline end-to-end.

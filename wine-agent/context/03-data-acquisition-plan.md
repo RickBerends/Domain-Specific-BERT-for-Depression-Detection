@@ -165,6 +165,10 @@ datasets already provide without risk.
 
 ## 7. Revised near-term milestones
 
+> **Superseded.** The current milestone plan lives in
+> [`04-roadmap.md`](./04-roadmap.md); the list below is kept for context.
+> (Its Week 1 is done; Week 2 is now roadmap Phase 3.)
+
 This replaces the original "Week 1" of the technical plan §10 and pushes the client
 crawl out of the critical path entirely:
 
