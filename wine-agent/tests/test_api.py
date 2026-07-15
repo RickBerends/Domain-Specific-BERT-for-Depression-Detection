@@ -37,12 +37,15 @@ def test_demo_page_served(client):
 
 
 def test_demo_renders_uniform_thumbnails(client):
-    # Regression guard: product-card images must render at a fixed size.
+    # Regression guard: product-card images must render at a fixed, uniform size
+    # regardless of image source or load failure.
     html = client.get("/demo").text
     assert ".thumb" in html
-    assert "object-fit: cover" in html  # differently-shaped images cropped to one box
-    assert "height: 120px" in html      # fixed thumbnail height
-    assert "makeThumb" in html          # placeholder-or-image tile per card
+    assert "object-fit: cover" in html   # any-shape image cropped to one box
+    assert "aspect-ratio: 4 / 3" in html  # every thumb is the same fixed-shape box
+    # a broken/missing image must fall back to the placeholder, never a
+    # mis-sized broken-image glyph
+    assert "addEventListener('error'" in html
 
 
 def test_snapshot_endpoint(client):
@@ -56,6 +59,7 @@ def test_snapshot_exposes_only_metadata(client):
     data = client.get("/snapshot").json()
     assert set(data) <= {
         "snapshot_id", "created_at", "published", "product_count", "content_count",
+        "backend",  # non-sensitive: which LLM backend is serving
     }
     assert "json" not in data and "products" not in data
 
