@@ -74,8 +74,13 @@
   .card .thumb {
     position: relative; width: 100%; aspect-ratio: 4 / 3; background: var(--accent-soft);
     display: flex; align-items: center; justify-content: center; font-size: 26px;
+    overflow: hidden;
   }
-  .card .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* Absolutely positioned so the image fills the fixed 4:3 box and can NEVER
+     drive the thumb's height to its own natural size — that in-flow behaviour
+     is what made cards render at different heights. object-fit: cover crops
+     any-shape source to the identical box. */
+  .card .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
   .card .role-badge {
     position: absolute; top: var(--space-2); left: var(--space-2);
     background: var(--panel); color: var(--accent); font-size: var(--fs-xs); font-weight: 600;
@@ -270,14 +275,22 @@ function addCardsBefore(node, cards) {
     const a = el('a', 'card');
     if (c.url) { a.href = c.url; a.target = '_blank'; a.rel = 'noopener'; }
 
+    // Every thumb is the same fixed-aspect box (see .thumb CSS). A photo is
+    // cropped to fill it (object-fit: cover); if the URL is missing OR fails
+    // to load (dead fixture URLs, blocked placeholder host, absent /img file)
+    // we swap in the 🍷 placeholder that fills the identical box — so no card
+    // ever renders a mis-sized broken-image glyph. This is what keeps every
+    // card visually consistent regardless of image source.
     const thumb = el('div', 'thumb');
     if (ROLE_LABELS[c.role]) thumb.appendChild(el('span', 'role-badge', ROLE_LABELS[c.role]));
+    const placeholder = () => thumb.appendChild(document.createTextNode('🍷'));
     if (c.image_url) {
       const img = document.createElement('img');
       img.src = c.image_url; img.alt = '';
+      img.addEventListener('error', () => { img.remove(); placeholder(); });
       thumb.appendChild(img);
     } else {
-      thumb.appendChild(document.createTextNode('🍷'));
+      placeholder();
     }
     a.appendChild(thumb);
 

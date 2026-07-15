@@ -65,6 +65,17 @@ class Config:
     history_turns: int = int(os.getenv("WINE_HISTORY_TURNS", "4"))
     session_ttl_seconds: float = float(os.getenv("WINE_SESSION_TTL", "1800"))
 
+    # --- Edge hardening (technical plan §7) ---
+    rate_limit_max: int = int(os.getenv("WINE_RATE_LIMIT_MAX", "20"))
+    rate_limit_window_seconds: float = float(os.getenv("WINE_RATE_LIMIT_WINDOW", "600"))
+    max_body_bytes: int = int(os.getenv("WINE_MAX_BODY_BYTES", "16384"))
+    # CORS allowlist for the embed widget. Empty ⇒ same-origin only.
+    allowed_origins: tuple[str, ...] = field(
+        default_factory=lambda: _split_csv(os.getenv("WINE_ALLOWED_ORIGINS", ""))
+    )
+    # Trust X-Forwarded-For for the client IP (only enable behind a known proxy).
+    trust_proxy: bool = os.getenv("WINE_TRUST_PROXY", "").lower() in ("1", "true", "yes")
+
     # Base URL for generated placeholder card images (chat.images) — used only
     # when a product has no real image_url. placehold.co is a purpose-built
     # placeholder-image generator, not a stand-in for real photography.

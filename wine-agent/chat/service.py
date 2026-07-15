@@ -22,6 +22,7 @@ from chat.llm import FakeLLM, LLMClient, LLMError
 from chat.planner import Filters, is_vague_request, plan
 from chat.prompt import build_clarifying_system_prompt, build_system_prompt, build_user_message
 from chat.retriever import HybridRetriever, select_recommendations
+from chat.security import looks_like_injection
 from chat.sessions import SessionStore
 from chat.snapshot import SnapshotReader
 from chat.tracing import span
@@ -97,6 +98,11 @@ class ChatService:
         ):
             yield from self._ask_clarifying(session_id, message, language)
             return
+
+        # Flag likely injection attempts for observability. We do NOT reject
+        # them: prompt.py neutralizes structural delimiters and the agent is
+        # read-only, so a blocklist would only add false positives.
+        suspected_injection = looks_like_injection(message)
 
         with span("retrieve", query=message, session_id=session_id) as sp:
             sp.set_attribute("security.injection_suspected", suspected_injection)
