@@ -14,8 +14,8 @@ They share nothing but the `schemas/` contract package and a published-snapshot 
 
 ## Stack
 
-Python 3.12 · FastAPI · Ollama (local LLM + embeddings) · Chroma/Qdrant · SQLite FTS5 ·
-Arize Phoenix (tracing + evals) · Preact web component shipped as a single `embed.js`
+Python · FastAPI · SQLite FTS5 + vector search · Groq (free cloud LLM) with a
+built-in offline fallback · Preact web component shipped as a single `embed.js`
 
 ## Planning docs
 
@@ -28,11 +28,12 @@ See [`context/`](./context):
 
 ## Status
 
-Runnable end-to-end: X-Wines catalogue ingest, hybrid retrieval with EN/NL
-metadata filters ("red under €15" / "rode wijn tot 15 euro"), session memory
-with follow-ups, and a browser demo at `/demo` — offline by default with
-deterministic fakes, Ollama-ready via env vars. See [`CHAT.md`](./CHAT.md) to
-run it. Remaining work follows the milestones in the technical plan.
+Runnable end-to-end: catalogue ingest, English/Dutch search and filters
+("red under €15" / "rode wijn tot 15 euro"), session memory with follow-ups,
+and a browser demo at `/demo`. It runs **offline by default** (canned replies,
+no setup) and switches to **Groq** for real AI answers with one API key. See
+[`CHAT.md`](./CHAT.md) to run it, and [`context/04-roadmap.md`](./context/04-roadmap.md)
+for what's next.
 
 ## Note on permission
 
